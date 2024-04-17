@@ -8,11 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 import { redirect } from "next/navigation";
-
-// 定义用户类型
-interface User {
-  name: string;
-}
+import { User } from "@/app/lib/definition";
 
 // 定义Context中的值的类型
 interface UserContextType {

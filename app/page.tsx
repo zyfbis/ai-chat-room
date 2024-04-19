@@ -13,5 +13,5 @@ export default function ChatPage() {
       redirect("/login");
     }
   }, [user]);
-  return <div></div>;
+  return <h1>ChatApp</h1>;
 }

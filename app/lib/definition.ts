@@ -8,3 +8,8 @@ export type Message = {
 };
 
 export const AI_SENDER = "AI";
+
+export type ChatRoom = {
+  name: string;
+  id: BigInt;
+};

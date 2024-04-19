@@ -1,7 +1,8 @@
 import { UserRedirect } from "@/app/user-context";
 import SideBar from "@/app/chat/side-bar";
+import { getChatRoomList } from "@/app/lib/data";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -10,7 +11,7 @@ export default function RootLayout({
     <UserRedirect>
       <div className="flex h-screen overflow-hidden">
         <div className="hidden md:block md:w-64">
-          <SideBar />
+          <SideBar chatRoomList={await getChatRoomList()} />
         </div>
         <div className="flex-grow overflow-hidden">{children}</div>
       </div>

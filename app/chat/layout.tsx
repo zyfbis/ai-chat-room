@@ -1,6 +1,5 @@
 import { UserRedirect } from "@/app/user-context";
 import SideBar from "@/app/chat/side-bar";
-import { getChatRoomList } from "@/app/lib/data";
 
 export default async function RootLayout({
   children,
@@ -11,7 +10,7 @@ export default async function RootLayout({
     <UserRedirect>
       <div className="flex h-screen overflow-hidden">
         <div className="hidden md:block md:w-64">
-          <SideBar chatRoomList={await getChatRoomList()} />
+          <SideBar />
         </div>
         <div className="flex-grow overflow-hidden">{children}</div>
       </div>

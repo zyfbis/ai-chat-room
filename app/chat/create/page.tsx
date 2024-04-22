@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { redirect } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { createChatRoom } from "@/app/lib/data";
 
 const RoomTemplates = ["互助会"];
@@ -10,13 +9,11 @@ const RoomTemplates = ["互助会"];
 export default function CreateRoomPage() {
   const [selectedTemplate, setSelectedTemplate] = useState(RoomTemplates[0]);
   const [roomDescription, setRoomDescription] = useState("");
-  const router = useRouter();
 
   async function handleCreateRoom(formData: FormData) {
     const roomName = `${selectedTemplate} - ${roomDescription}`;
     const room = await createChatRoom(roomName);
     const roomId = room.id;
-    router.refresh();
     redirect(`/chat/${roomId}`);
   }
 

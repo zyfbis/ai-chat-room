@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
+import registerChatServer from "./app/chat-server/register";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -11,16 +12,8 @@ const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
-
   const io = new Server(httpServer);
-
-  io.on("connection", (socket) => {
-    console.log("a user connected");
-
-    socket.on("disconnect", () => {
-      console.log("a user disconnected");
-    });
-  });
+  registerChatServer(io);
 
   httpServer
     .once("error", (err) => {

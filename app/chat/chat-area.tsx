@@ -104,7 +104,6 @@ export default function ChatArea({
       );
       // 新增一条消息
       if (events.includes(SERVER_MESSAGE_ONE)) {
-        // setMessageList((msgList) => [...msgList, message]);
         setMessageList([...messageList, message]);
       }
     }
@@ -117,18 +116,6 @@ export default function ChatArea({
       );
       // 更新最后一条消息
       if (events.includes(SERVER_MESSAGE_ONE_PART)) {
-        // setMessageList((msgList) => {
-        //   let lastMessage = msgList.pop();
-        //   if (!lastMessage) {
-        //     console.error("message list is empty");
-        //     lastMessage = { content: "", sender: "" };
-        //   }
-        //   const newLastMessage: Message = {
-        //     content: lastMessage.content + messagePart,
-        //     sender: lastMessage.sender,
-        //   };
-        //   return [...msgList, newLastMessage];
-        // });
         let newMessageList = [...messageList];
         let lastMessage = newMessageList.pop();
         if (!lastMessage) {
@@ -172,7 +159,7 @@ export default function ChatArea({
   }, [roomId, events, messageList]);
 
   return (
-    <div className="h-full flex flex-col pl-4 pr-4 pt-4">
+    <div className="flex flex-col h-full pl-4 pr-4 pt-4">
       <div
         className="flex-grow overflow-y-auto border-4 rounded p-2"
         ref={messageContainerRef}
@@ -187,7 +174,7 @@ export default function ChatArea({
             }`}
           >
             <div className="text-sm text-gray-500">{message.sender}</div>
-            <div className="inline-block p-2 bg-gray-50 rounded whitespace-pre-wrap">
+            <div className="inline-block p-2 bg-gray-50 rounded whitespace-pre-wrap text-left max-w-[80%]">
               {message.content}
             </div>
           </div>

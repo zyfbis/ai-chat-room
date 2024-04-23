@@ -1,8 +1,9 @@
 "use client";
 
-import { useUser } from "@/app/user-context";
-import { redirect } from "next/navigation";
 import { useEffect } from "react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { useUser } from "@/app/user-context";
 
 export default function ChatPage() {
   const { user } = useUser();
@@ -13,5 +14,13 @@ export default function ChatPage() {
       redirect("/login");
     }
   }, [user]);
-  return <h1>ChatApp</h1>;
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="bg-white p-8 rounded shadow-md">
+        <Link href="/login">
+          <button className="text-8xl font-bold mb-4">ChatAPP</button>
+        </Link>
+      </div>
+    </div>
+  );
 }

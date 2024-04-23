@@ -9,7 +9,7 @@ export default async function RootLayout({
   return (
     <UserRedirect>
       <div className="flex h-screen overflow-hidden">
-        <div className="hidden md:block md:w-64">
+        <div className="hidden md:block md:min-w-64">
           <SideBar />
         </div>
         <div className="flex-grow overflow-hidden">{children}</div>

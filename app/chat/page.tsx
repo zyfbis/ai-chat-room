@@ -1,22 +1,22 @@
-"use client";
-
-import { useState } from "react";
 import ChatArea from "@/app/chat/chat-area";
-import { Message } from "@/app/lib/definition";
-import { chatCompletion } from "@/app/lib/llm";
+import {
+  // CLIENT_MESSAGE_ONE,
+  CLIENT_MESSAGE_ALL,
+  SERVER_MESSAGE_ONE,
+  SERVER_MESSAGE_ONE_PART,
+  SERVER_MESSAGE_ALL,
+} from "@/app/chat-server/constant";
 
 export default function ChatPage() {
-  const [messageList, setMessageList] = useState<Message[]>([]);
-
-  async function aiMessage(message: Message) {
-    let newMessageList = [...messageList];
-    newMessageList.push(message);
-    setMessageList([...newMessageList]);
-
-    const newAIMessage = await chatCompletion(newMessageList);
-    newMessageList.push(newAIMessage);
-    setMessageList([...newMessageList]);
-  }
-
-  return <ChatArea onSendMessage={aiMessage} messageList={messageList} />;
+  return (
+    <ChatArea
+      roomId={"Chatbot"}
+      events={[
+        CLIENT_MESSAGE_ALL,
+        SERVER_MESSAGE_ONE,
+        SERVER_MESSAGE_ONE_PART,
+        SERVER_MESSAGE_ALL,
+      ]}
+    />
+  );
 }

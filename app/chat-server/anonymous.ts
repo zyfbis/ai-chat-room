@@ -324,7 +324,9 @@ export class AnonymousController {
       if (name === AI_SENDER) {
         name = "主持人";
       }
-      chatHistory += `${name}: "${message.content}"\n`;
+      chatHistory += `## 发言人 \n${name}\n`
+      chatHistory += `## 发言内容 \n${message.content}\n`
+      chatHistory += `## 发言结束\n`
     });
 
     let prompt = `
@@ -333,7 +335,7 @@ export class AnonymousController {
       ---
       ${chatHistory}
       ---
-      注意，请你只输出主持人的发言，不要输出用户的发言
+      注意区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言
     `;
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }
@@ -351,7 +353,9 @@ export class AnonymousController {
       if (name === AI_SENDER) {
         name = "主持人";
       }
-      chatHistory += `${name}: "${message.content}"\n`;
+      chatHistory += `## 发言人 \n${name}\n`
+      chatHistory += `## 发言内容 \n${message.content}\n`
+      chatHistory += `## 发言结束\n`
     });
 
     let prompt = `
@@ -360,7 +364,7 @@ export class AnonymousController {
       ---
       ${chatHistory}
       ---
-      注意，请你只输出主持人的发言，不要输出用户的发言
+      注意区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言
     `;
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }
@@ -377,7 +381,9 @@ export class AnonymousController {
       if (name === AI_SENDER) {
         name = "主持人";
       }
-      chatHistory += `${name}: "${message.content}"\n`;
+      chatHistory += `## 发言人 \n${name}\n`
+      chatHistory += `## 发言内容 \n${message.content}\n`
+      chatHistory += `## 发言结束\n`
     });
 
     let prompt = `
@@ -386,7 +392,7 @@ export class AnonymousController {
       ---
       ${chatHistory}
       ---
-      注意，请你只输出主持人的发言，不要输出用户的发言
+      注意区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言
     `;
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }

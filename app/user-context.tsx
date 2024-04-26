@@ -8,7 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 import { redirect } from "next/navigation";
-import { User } from "@/app/lib/definition";
+import { User } from "@/app/chat-server/definition";
 
 // 定义Context中的值的类型
 interface UserContextType {

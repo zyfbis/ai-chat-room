@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { useUser } from "@/app/user-context";
-import { Message } from "@/app/lib/definition";
+import { Message, SYSTEM_SENDER } from "@/app/chat-server/definition";
 import { socket } from "@/app/chat-server/socket-client";
 import {
+  CLIENT_LOGIN,
+  CLIENT_LOGOUT,
   CLIENT_MESSAGE_ONE,
   CLIENT_MESSAGE_ALL,
   SERVER_MESSAGE_ONE,
@@ -77,16 +79,7 @@ export default function ChatArea({
     return rows;
   };
 
-  useEffect(() => {
-    // no-op if the socket is already connected
-    socket.connect();
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  // 接收socket消息
+  // 连接和断开
   useEffect(() => {
     function onConnect() {
       console.log("socket connected");
@@ -96,8 +89,39 @@ export default function ChatArea({
       console.log("socket disconnected");
     }
 
+    function clientLogin() {
+      if (events.includes(CLIENT_LOGIN)) {
+        socket.emit(CLIENT_LOGIN, roomId, user!.name);
+      }
+    }
+
+    function clientLogout() {
+      if (events.includes(CLIENT_LOGOUT)) {
+        socket.emit(CLIENT_LOGOUT, roomId, user!.name);
+      }
+    }
+
+    socket.connect(); // no-op if the socket is already connected
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    // 等到下面的消息接收函数注册完成
+    setTimeout(clientLogin, 0);
+    window.addEventListener("beforeunload", clientLogout);
+
+    return () => {
+      clientLogout();
+      window.removeEventListener("beforeunload", clientLogout);
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.disconnect();
+    };
+  }, [roomId, events, user]);
+
+  // 接收socket消息
+  useEffect(() => {
     function onServerMessageOne(rid: string, message: Message) {
-      console.log("received server message one", message);
+      // console.log("received server message one", message);
       console.assert(
         rid === roomId,
         `received message from wrong room ${rid} vs ${roomId}`
@@ -109,7 +133,7 @@ export default function ChatArea({
     }
 
     function onServerMessageOnePart(rid: string, messagePart: string) {
-      console.log("received server message one part", messagePart);
+      // console.log("received server message one part", messagePart);
       console.assert(
         rid === roomId,
         `received message from wrong room ${rid} vs ${roomId}`
@@ -132,7 +156,7 @@ export default function ChatArea({
     }
 
     function onServerMessageAll(rid: string, newMessageList: Message[]) {
-      console.log("received server message all", newMessageList);
+      // console.log("received server message all", newMessageList);
       console.assert(
         rid === roomId,
         `received message from wrong room ${rid} vs ${roomId}`
@@ -143,15 +167,11 @@ export default function ChatArea({
       }
     }
 
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
     socket.on(SERVER_MESSAGE_ONE, onServerMessageOne);
     socket.on(SERVER_MESSAGE_ONE_PART, onServerMessageOnePart);
     socket.on(SERVER_MESSAGE_ALL, onServerMessageAll);
 
     return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
       socket.off(SERVER_MESSAGE_ONE, onServerMessageOne);
       socket.off(SERVER_MESSAGE_ONE_PART, onServerMessageOnePart);
       socket.off(SERVER_MESSAGE_ALL, onServerMessageAll);
@@ -169,9 +189,15 @@ export default function ChatArea({
         {messageList.map((message, index) => (
           <div
             key={index}
-            className={`mb-4 ${
-              message.sender === user?.name ? "text-right" : "text-left"
-            }`}
+            className={`mb-4 ${(() => {
+              if (message.sender === SYSTEM_SENDER) {
+                return "text-center";
+              }
+              if (message.sender === user!.name) {
+                return "text-right";
+              }
+              return "text-left";
+            })()}`}
           >
             <div className="text-sm text-gray-500">{message.sender}</div>
             <div className="inline-block p-2 bg-gray-50 rounded whitespace-pre-wrap text-left max-w-[80%]">

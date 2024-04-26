@@ -1,3 +1,7 @@
+// 客户端发送登录请求给服务器
+export const CLIENT_LOGIN = "client-login";
+// 客户端发送登出请求给服务器
+export const CLIENT_LOGOUT = "client-logout";
 // 客户端发送一条消息给服务器
 export const CLIENT_MESSAGE_ONE = "client-message-one";
 // 客户端发送所有消息给服务器

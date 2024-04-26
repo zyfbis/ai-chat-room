@@ -12,7 +12,9 @@ const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
   const httpServer = createServer(handler);
-  const io = new Server(httpServer);
+  const io = new Server(httpServer, {
+    connectionStateRecovery: {},
+  });
   registerChatServer(io);
 
   httpServer

@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { redirect } from "next/navigation";
-import { createChatRoom } from "@/app/lib/data";
+import {
+  AnonymousState,
+  AnonymousStageEnum,
+} from "@/app/chat-server/anonymous-def";
+import { createChatRoom, createChatRoomState } from "@/app/chat-server/data";
 
 const RoomTemplates = ["互助会"];
 
@@ -11,9 +15,25 @@ export default function CreateRoomPage() {
   const [roomDescription, setRoomDescription] = useState("");
 
   async function handleCreateRoom(formData: FormData) {
-    const roomName = `${selectedTemplate} - ${roomDescription}`;
+    // 创建房间
+    const roomName = `${roomDescription}-${selectedTemplate}`;
     const room = await createChatRoom(roomName);
     const roomId = room.id;
+
+    // 创建房间状态
+    console.assert(selectedTemplate === "互助会", "目前只支持互助会");
+    const state: AnonymousState = {
+      roomId,
+      description: roomName,
+      messageHistory: [],
+      stage: AnonymousStageEnum.START,
+      allUsers: [],
+      waitingUsers: [],
+      spokenUsers: [],
+    };
+    await createChatRoomState(roomId, state);
+
+    // 跳转到房间
     redirect(`/chat/${roomId}`);
   }
 

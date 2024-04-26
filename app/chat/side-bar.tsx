@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@/app/user-context";
-import { ChatRoom } from "@/app/lib/definition";
-import { getChatRoomList, deleteChatRoom } from "@/app/lib/data";
+import { ChatRoom } from "@/app/chat-server/definition";
+import { getChatRoomList, deleteChatRoom } from "@/app/chat-server/data";
 
 export function ChatRoomCard({
   name,

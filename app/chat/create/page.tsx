@@ -28,8 +28,6 @@ export default function CreateRoomPage() {
       messageHistory: [],
       stage: AnonymousStageEnum.START,
       allUsers: [],
-      waitingUsers: [],
-      spokenUsers: [],
     };
     await createChatRoomState(roomId, state);
 

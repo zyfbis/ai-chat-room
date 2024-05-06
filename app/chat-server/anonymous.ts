@@ -39,7 +39,10 @@ export class AnonymousController {
         content: `欢迎来到${this.state.description}，当前活动未开始，请发送 ${AnonymousCommandEnum.SIGN_UP} 报名`,
         sender: SYSTEM_SENDER,
       };
-    } else if (this.state.stage === AnonymousStageEnum.CHAT_INTRO) {
+    } else if (
+      this.state.stage === AnonymousStageEnum.CHAT_INTRO ||
+      this.state.stage === AnonymousStageEnum.CHAT_STORY
+    ) {
       loginMessage = {
         content: `欢迎来到${this.state.description}，当前活动进行中，请安静围观`,
         sender: SYSTEM_SENDER,

@@ -1,15 +1,12 @@
+import { stringify } from "yaml";
 import OpenAI from "openai";
-import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
-
 import { Server, Socket } from "socket.io";
-import { Message, ChatRoomState } from "./definition";
-import { AI_SENDER, SYSTEM_SENDER } from "./definition";
+import { Message, AI_SENDER, SYSTEM_SENDER } from "./definition";
 import {
   SERVER_MESSAGE_ONE,
   SERVER_MESSAGE_ONE_PART,
   SERVER_MESSAGE_ALL,
 } from "./constant";
-import { socket } from "./socket-client";
 import {
   AnonymousStageEnum,
   AnonymousState,
@@ -258,6 +255,8 @@ export class AnonymousController {
     allow_users: Set<string>,
     prompt: string
   ) {
+    console.log(prompt);
+
     // 保存原来的允许发言用户
     const oldAllowUsers = new Set(allow_users);
     allow_users.clear(); // AI发言时禁止其他用户发言
@@ -311,6 +310,35 @@ export class AnonymousController {
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }
 
+  private generateContextPrompt(): string {
+    let contextPrompt = "";
+    contextPrompt += `你是一个${this.state.description}的主持人\n`;
+    contextPrompt += `以下是${this.state.description}内过去的聊天历史：\n`;
+
+    // 生成聊天历史
+    let chatHistory = Array<Message>();
+    for (let i = 0; i < this.state.messageHistory.length; i++) {
+      const message = this.state.messageHistory[i];
+      if (message.sender === AI_SENDER) {
+        chatHistory.push({
+          sender: "主持人",
+          content: message.content,
+        });
+      } else {
+        chatHistory.push({
+          sender: message.sender,
+          content: message.content,
+        });
+      }
+    }
+    const chatHistoryStr = stringify(chatHistory);
+
+    contextPrompt += "```yaml\n";
+    contextPrompt += chatHistoryStr;
+    contextPrompt += "```\n";
+    return contextPrompt;
+  }
+
   // 引导用户发言-自我介绍
   private async guideUserSelfIntroduction(
     io: Server,
@@ -318,25 +346,24 @@ export class AnonymousController {
     userName: string,
     allow_users: Set<string>
   ) {
-    let chatHistory = "";
-    this.state.messageHistory.forEach((message) => {
-      let name = message.sender;
-      if (name === AI_SENDER) {
-        name = "主持人";
-      }
-      chatHistory += `## 发言人 \n${name}\n`
-      chatHistory += `## 发言内容 \n${message.content}\n`
-      chatHistory += `## 发言结束\n`
-    });
+    const contextPrompt = this.generateContextPrompt();
+    const currentUserName = userName;
+    const currentUserIndex = this.state.allUsers.indexOf(currentUserName);
+    let lastUserName = null;
+    if (currentUserIndex > 0) {
+      lastUserName = this.state.allUsers[currentUserIndex - 1];
+    }
 
-    let prompt = `
-      你是一个${this.state.description}的主持人，
-      请根据以下的聊天历史，引导用户 ${userName} 进行自我介绍：
-      ---
-      ${chatHistory}
-      ---
-      注意区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言
-    `;
+    let prompt = contextPrompt;
+    if (lastUserName) {
+      prompt += `上一个发言的用户是 ${lastUserName}\n`;
+      prompt += `下一个将要发言的用户是 ${currentUserName}\n`;
+      prompt += `请你简单回应上一个用户的发言，并且引导下一个用户发言，进行自我介绍\n`;
+    } else {
+      prompt += `请你引导用户 ${currentUserName} 进行自我介绍\n`;
+    }
+    prompt += `注意，请区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言\n`;
+    prompt += `请直接输出主持人的发言内容，不带有任何格式\n`;
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }
 
@@ -347,25 +374,22 @@ export class AnonymousController {
     userName: string,
     allow_users: Set<string>
   ) {
-    let chatHistory = "";
-    this.state.messageHistory.forEach((message) => {
-      let name = message.sender;
-      if (name === AI_SENDER) {
-        name = "主持人";
-      }
-      chatHistory += `## 发言人 \n${name}\n`
-      chatHistory += `## 发言内容 \n${message.content}\n`
-      chatHistory += `## 发言结束\n`
-    });
+    const contextPrompt = this.generateContextPrompt();
+    const currentUserName = userName;
+    const currentUserIndex = this.state.allUsers.indexOf(currentUserName);
+    let lastUserName = null;
+    if (currentUserIndex > 0) {
+      lastUserName = this.state.allUsers[currentUserIndex - 1];
+    } else {
+      lastUserName = this.state.allUsers[this.state.allUsers.length - 1];
+    }
 
-    let prompt = `
-      你是一个${this.state.description}的主持人，
-      请根据以下的聊天历史，引导用户 ${userName} 讲述自己的故事：
-      ---
-      ${chatHistory}
-      ---
-      注意区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言
-    `;
+    let prompt = contextPrompt;
+    prompt += `上一个发言的用户是 ${lastUserName}\n`;
+    prompt += `下一个将要发言的用户是 ${currentUserName}\n`;
+    prompt += `请你简单回应上一个用户的发言，并且引导用户 ${currentUserName} 讲述自己的故事\n`;
+    prompt += `注意，请区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言\n`;
+    prompt += `请直接输出主持人的发言内容，不带有任何格式\n`;
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }
 
@@ -375,25 +399,10 @@ export class AnonymousController {
     roomId: string,
     allow_users: Set<string>
   ) {
-    let chatHistory = "";
-    this.state.messageHistory.forEach((message) => {
-      let name = message.sender;
-      if (name === AI_SENDER) {
-        name = "主持人";
-      }
-      chatHistory += `## 发言人 \n${name}\n`
-      chatHistory += `## 发言内容 \n${message.content}\n`
-      chatHistory += `## 发言结束\n`
-    });
-
-    let prompt = `
-      你是一个${this.state.description}的主持人，
-      请根据以下的聊天历史，生成一段结束语，总结今天的${this.state.description}活动：
-      ---
-      ${chatHistory}
-      ---
-      注意区分不同用户的发言内容，且只输出主持人的发言，不要输出用户的发言
-    `;
+    const contextPrompt = this.generateContextPrompt();
+    let prompt = contextPrompt;
+    prompt += `请你根据以上的聊天历史，总结今天的${this.state.description}活动，生成一段结束语\n`;
+    prompt += `请直接输出主持人的发言内容，不带有任何格式\n`;
     await this.generateAIResponse(io, roomId, allow_users, prompt);
   }
 }

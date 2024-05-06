@@ -30,7 +30,7 @@ export function stringifyChatRoomState(state: ChatRoomState): string {
 }
 
 export function parseChatRoomState(stateStr: string): ChatRoomState {
-  return JSON.parse(stateStr, (key, value) => {
+return JSON.parse(stateStr, (key, value) => {
     if (key === "roomId") {
       return BigInt(value);
     }
